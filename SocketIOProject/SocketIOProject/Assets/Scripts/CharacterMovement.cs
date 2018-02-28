@@ -50,9 +50,14 @@ public class CharacterMovement : MonoBehaviour
 
 	}
 
-    public void NetworkMovement(Vector3 pos)
+    public void NetworkMovement(Vector3 pos, float h, float v)
     {
         transform.position = pos;
+        Animating(h, v);
+        if(h != 0 || v!= 0f)
+        {
+            NetworkRotating(h, v);
+        }
     }
 
 	void Rotating(float h, float v)
@@ -63,8 +68,17 @@ public class CharacterMovement : MonoBehaviour
 		GetComponent<Rigidbody>().MoveRotation(newRotation);
 	}
 
-	//Regular Animation
-	void Animating(float h, float v)
+    void NetworkRotating(float h, float v)
+    {
+        Vector3 targetDirection = new Vector3(h, 0f, v);
+        Quaternion targetRotation = Quaternion.LookRotation(targetDirection, Vector3.up);
+        Quaternion newRotation = Quaternion.Lerp(GetComponent<Rigidbody>().rotation, targetRotation, turnSmoothing * Time.deltaTime);
+        GetComponent<Rigidbody>().MoveRotation(newRotation);
+        transform.rotation = newRotation;
+    }
+
+    //Regular Animation
+    void Animating(float h, float v)
 	{
 		bool running = h != 0f || v != 0f;
 
